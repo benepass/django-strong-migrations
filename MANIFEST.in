@@ -1,0 +1,4 @@
+include LICENSE
+include README.rst
+recursive-include strong_migrations/management *
+recursive-include strong_migrations/errors *

@@ -1,0 +1,15 @@
+MANIFEST.in
+README.rst
+pyproject.toml
+setup.cfg
+setup.py
+django_strong_migrations.egg-info/PKG-INFO
+django_strong_migrations.egg-info/SOURCES.txt
+django_strong_migrations.egg-info/dependency_links.txt
+django_strong_migrations.egg-info/requires.txt
+django_strong_migrations.egg-info/top_level.txt
+strong_migrations/__init__.py
+strong_migrations/apps.py
+strong_migrations/tests.py
+strong_migrations/errors/unsafe_migration_error.py
+strong_migrations/management/commands/migrate.py
