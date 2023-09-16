@@ -19,6 +19,6 @@ class UnsafeMigrationError(Exception):
               - migration: {migration.name}
               - operation: {operation.__class__.__name__}
 
-              Please see the documentation at GITHUB_LINK
+              Please see the documentation at https://github.com/benepass/django-strong-migrations#readme
             """
         )
