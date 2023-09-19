@@ -14,7 +14,7 @@ class UnsafeMigrationError(Exception):
 
               =======================
 
-              UNSAFE MIGRATION DETCTED:
+              UNSAFE MIGRATION DETECTED:
 
               - migration: {migration.name}
               - operation: {operation.__class__.__name__}
