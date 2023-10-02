@@ -16,6 +16,29 @@ INSTALLED_APPS = [
 ]
 ```
 
+### Ignoring Existing Files
+
+Often times users installing this package will have a set of migrations that have already been applied which do not need to be checked for safety.
+
+In order to ignore all of these files, mark a starting point in each of your `apps.py` files, respectively.
+
+```python
+# project/apps.py
+from django.apps import AppConfig
+
+
+class MyApp(AppConfig):
+    name = "my_app"
+    verbose_name = "My App"
+    # this will start checking for safety at the next migration, 0174_some_migration
+    check_safe_migrations_from = "0173_my_existing_migration"
+
+    def ready(self):
+        super().ready()
+
+        import my_app.signals
+```
+
 ## Unsafe Migrations
 
 ### RemoveField

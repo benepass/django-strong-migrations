@@ -65,11 +65,53 @@ class Command(BaseMigrateCommand):
         else:
             targets = executor.loader.graph.leaf_nodes()
 
+        # users can determine which migration to start checking safety of from each app
+        # we need to mark all migrations prior to the selected migration as "applied"
+        # so that our migration plan no longer includes them
+        starting_targets = []
+        for target in targets:
+            app_label, _target = target
+            check_from = getattr(
+                apps.get_app_config(app_label=app_label),
+                "check_safe_migrations_from",
+                None,
+            )
+            if not check_from:
+                continue
+            try:
+                executor.loader.get_migration(
+                    app_label=app_label, name_prefix=check_from
+                )
+            except Exception as e:
+                raise RuntimeError(f"Failed to load starting migration {check_from}")
+            starting_targets.append((app_label, check_from))
+
+        if starting_targets:
+            starting_plan = executor.migration_plan(targets=starting_targets)
+            for migration, backwards in starting_plan:
+                if not backwards:
+                    executor.recorder.record_applied(
+                        app=migration.app_label, name=migration.name
+                    )
+            executor.loader.build_graph()
+
+        # now we can check the actual migrations we need
         plan = executor.migration_plan(targets)
+
         for migration, is_backwards in plan:
             if not is_backwards:
                 self.check_migration_safety(migration)
 
+        # now we need to reset our migration state so that the real migrate command
+        # actually runs everything it needs
+        for migration, backwards in starting_plan:
+            if not backwards:
+                executor.recorder.record_unapplied(
+                    app=migration.app_label, name=migration.name
+                )
+            executor.loader.build_graph()
+
+        executor.migration_plan(targets)
         return super().handle(*args, **options)
 
     def check_migration_safety(self, migration: Migration):
