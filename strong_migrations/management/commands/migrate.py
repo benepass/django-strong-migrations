@@ -104,12 +104,13 @@ class Command(BaseMigrateCommand):
 
         # now we need to reset our migration state so that the real migrate command
         # actually runs everything it needs
-        for migration, backwards in starting_plan:
-            if not backwards:
-                executor.recorder.record_unapplied(
-                    app=migration.app_label, name=migration.name
-                )
-            executor.loader.build_graph()
+        if starting_targets:
+            for migration, backwards in starting_plan:
+                if not backwards:
+                    executor.recorder.record_unapplied(
+                        app=migration.app_label, name=migration.name
+                    )
+                executor.loader.build_graph()
 
         executor.migration_plan(targets)
         return super().handle(*args, **options)
