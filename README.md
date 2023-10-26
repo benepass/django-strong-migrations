@@ -52,18 +52,25 @@ The safe migration path is to use a state operation to tell django to ignore the
 
 ```python
 # first migration
+from django.db import migrations, models
+
 class Migration(migrations.Migration):
     dependencies = [
         ('api', 'prior_migration'),
     ]
 
-    state_operations = [
-        migrations.RemoveField(
-            model_name='user',
-            name='my_field',
+    operations = [
+        migrations.RunSQL(
+            sql=migrations.RunSQL.noop,
+            reverse_sql=migrations.RunSQL.noop,
+            state_operations=[
+                migrations.RemoveField(
+                    model_name='user',
+                    name='my_field',
+                )
+            ]
         )
     ]
-    operations = []
 ```
 
 deploy the app after the above migration
