@@ -59,6 +59,7 @@ class Command(BaseMigrateCommand):
                 targets = [(app_label, migration.name)]
             target_app_labels_only = False
         elif options["app_label"]:
+            app_label = options["app_label"]
             targets = [
                 key for key in executor.loader.graph.leaf_nodes() if key[0] == app_label
             ]
@@ -86,6 +87,7 @@ class Command(BaseMigrateCommand):
                 raise RuntimeError(f"Failed to load starting migration {check_from}")
             starting_targets.append((app_label, check_from))
 
+        starting_plan = None
         if starting_targets:
             starting_plan = executor.migration_plan(targets=starting_targets)
             for migration, backwards in starting_plan:
