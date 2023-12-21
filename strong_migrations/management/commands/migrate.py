@@ -7,7 +7,7 @@ from django.apps import apps
 from django.core.management.commands.migrate import (
     Command as BaseMigrateCommand,
 )
-from django.db.migrations.operations.fields import RemoveField
+from django.db.migrations.operations.fields import RemoveField, RenameField
 from django.db.migrations.operations.base import Operation
 from django.db.migrations.migration import Migration
 from django.db.migrations.loader import AmbiguityError
@@ -119,7 +119,7 @@ class Command(BaseMigrateCommand):
 
     def check_migration_safety(self, migration: Migration):
         for operation in migration.operations:
-            if isinstance(operation, RemoveField):
+            if type(operation) in [RemoveField, RenameField]:
                 self.raise_or_warn(operation=operation, migration=migration)
 
     def raise_or_warn(self, migration: Migration, operation: Operation):
