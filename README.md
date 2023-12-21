@@ -1,11 +1,8 @@
 # Django Strong Migrations
 
-
 Django Strong Migrations was inspired by the wonderful [ankane/strong_migrations](https://github.com/ankane/strong_migrations) for rails.
 
-
 ## Quick start
-
 
 1. Add "strong_migrations" to your INSTALLED_APPS setting like this::
 
@@ -41,14 +38,24 @@ class MyApp(AppConfig):
 
 ## Unsafe Migrations
 
+### RenameField
+
+Renaming a column that's in use will cause application errors in between migrations running and the application deploying, a safer approach is to:
+
+- Create a new column
+- Write to both columns
+- Backfill data from the old column to the new column
+- Move reads from the old column to the new column
+- Stop writing to the old column
+- Drop the old column
+
 ### RemoveField
 
-Removing a field using the standard `RemoveField` operation result in errors in your migration. 
+Removing a field using the standard `RemoveField` operation result in errors in your migration.
 
 This happens when migrations run before your application has been deployed. Your application will continue referring to the field until it has succesfully been deployed.
 
 The safe migration path is to use a state operation to tell django to ignore the field, deploy that change, and then safely drop the django column afterwards:
-
 
 ```python
 # first migration
@@ -92,6 +99,7 @@ operations = [
 ### Marking Migrations as Safe
 
 you can ignore the error and run the migration anyways by setting `safety_assured=True` in your migration like so:
+
 ```python
 # unsafe migration
 class Migration(migrations.Migration):
@@ -109,4 +117,3 @@ class Migration(migrations.Migration):
         )
     ]
 ```
-
