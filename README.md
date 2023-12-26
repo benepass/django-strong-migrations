@@ -13,7 +13,7 @@ INSTALLED_APPS = [
 ]
 ```
 
-### Ignoring Existing Files
+## Ignoring Existing Files
 
 Often times users installing this package will have a set of migrations that have already been applied which do not need to be checked for safety.
 
@@ -37,6 +37,17 @@ class MyApp(AppConfig):
 ```
 
 ## Unsafe Migrations
+
+Potentially dangerous operations:
+
+- [renaming a field](#renamefield)
+- [removing a field](#removefield)
+
+Postgres-specific checks:
+
+- [adding a constraint](#addconstraint)
+- [adding an index](#addindex)
+- [removing an index](#removeindex)
 
 ### RenameField
 
@@ -96,7 +107,111 @@ operations = [
 ]
 ```
 
-### Marking Migrations as Safe
+## Postgres Specific Operations:
+
+### AddConstraint
+
+Adding a constraint will lock the table for reads and writes while the table is scanned in order to validate the constraint.
+
+A safer method is to add the constraint with the `NOT VALID` option, which will add the constraint immediately without validating existing rows.
+
+Then, in a follow up operation, you can use `VALIDATE CONSTRAINT`, which does not updates to the table.
+
+```python
+from django.db import migrations, models
+
+class Migration(migrations.Migration):
+    dependencies = [
+        ('app', 'prior_migration'),
+    ]
+
+    operations = [
+        migrations.RunSQL(
+            sql='ALTER TABLE "my_model" ADD CONSTRAINT "field_is_positive" CHECK (("field" > 0 OR "field" IS NULL)) NOT VALID;',
+            reverse_sql='ALTER TABLE "my_model" DROP CONSTRAINT "field_is_positive"',
+            reverse_sql=migrations.RunSQL.noop,
+            state_operations=[
+                migrations.AddConstraint(
+                    model_name="my_model",
+                    constraint=models.CheckConstraint(
+                        check=models.Q(
+                            ("field__gt", 0),
+                            ("field__isnull", True),
+                            _connector="OR",
+                        ),
+                        name="field_is_positive",
+                    ),
+                ),
+            ]
+        ),
+        migrations.RunSQL(
+            sql="alter table schedules_schedulelayer validate constraint positive_sl_frequency;",
+            reverse_sql=migrations.RunSQL.noop
+        )
+    ]
+```
+
+### AddIndex
+
+Adding an index non-concurrently blocks writes while the index is built. Instead, we can use Djangos built in `AddIndexConcurrently`.
+
+[see pg documentation for more info and caveats](https://www.postgresql.org/docs/current/sql-createindex.html#SQL-CREATEINDEX-CONCURRENTLY)
+
+```python
+import django.contrib.postgres.indexes
+from django.db import migrations, models
+from django.contrib.postgres.operations import AddIndexConcurrently
+
+
+class Migration(migrations.Migration):
+
+    atomic = False
+
+    dependencies = [
+        ("app", "prior_migration"),
+    ]
+
+    operations = [
+        AddIndexConcurrently(
+            model_name="my_model",
+            index=models.Index(
+                fields=["name"], name="name_idx"
+            ),
+        ),
+    ]
+```
+
+### RemoveIndex
+
+Removing an index non-concurrently blocks writes while the index is built. Instead, we can use Djangos built in `DropIndexConcurrently`.
+
+[see pg documentation for more info and caveats](https://www.postgresql.org/docs/current/sql-dropindex.html)
+
+```python
+import django.contrib.postgres.indexes
+from django.db import migrations, models
+from django.contrib.postgres.operations import DropIndexConcurrently
+
+
+class Migration(migrations.Migration):
+
+    atomic = False
+
+    dependencies = [
+        ("app", "prior_migration"),
+    ]
+
+    operations = [
+        DropIndexConcurrently(
+            model_name="my_model",
+            index=models.Index(
+                fields=["name"], name="name_idx"
+            ),
+        ),
+    ]
+```
+
+## Marking Migrations as Safe
 
 you can ignore the error and run the migration anyways by setting `safety_assured=True` in your migration like so:
 
