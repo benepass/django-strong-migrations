@@ -12,5 +12,11 @@ django_strong_migrations.egg-info/top_level.txt
 strong_migrations/__init__.py
 strong_migrations/apps.py
 strong_migrations/tests.py
+strong_migrations/check_safety/__init__.py
+strong_migrations/check_safety/checks.py
+strong_migrations/check_safety/info_messages.py
+strong_migrations/check_safety/migration_safety.py
+strong_migrations/errors/__init__.py
 strong_migrations/errors/unsafe_migration_error.py
 strong_migrations/management/commands/migrate.py
+tests/test_migrate.py

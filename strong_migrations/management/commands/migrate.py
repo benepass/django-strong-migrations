@@ -7,17 +7,12 @@ from django.apps import apps
 from django.core.management.commands.migrate import (
     Command as BaseMigrateCommand,
 )
-from django.db.migrations.operations.fields import (
-    RemoveField,
-    RenameField,
-)
-from django.db.migrations.operations.models import AddConstraint, AddIndex, RemoveIndex
-from django.db.migrations.operations.base import Operation
-from django.db.migrations.migration import Migration
+
 from django.db.migrations.loader import AmbiguityError
 from django.core.management.base import CommandError
 from django.db.migrations.executor import MigrationExecutor
-from strong_migrations.errors.unsafe_migration_error import UnsafeMigrationError
+from strong_migrations.check_safety import check_migration_safety
+from django.conf import settings
 import logging
 
 logger = logging.getLogger(__name__)
@@ -103,10 +98,15 @@ class Command(BaseMigrateCommand):
 
         # now we can check the actual migrations we need
         plan = executor.migration_plan(targets)
+        pre_migrate_state = executor._create_project_state(with_applied_migrations=True)
 
         for migration, is_backwards in plan:
             if not is_backwards:
-                self.check_migration_safety(migration)
+                check_migration_safety(
+                    migration=migration,
+                    project_state=pre_migrate_state,
+                    pg_major_version=self._pg_major_version(connection),
+                )
 
         # now we need to reset our migration state so that the real migrate command
         # actually runs everything it needs
@@ -121,22 +121,19 @@ class Command(BaseMigrateCommand):
         executor.migration_plan(targets)
         return super().handle(*args, **options)
 
-    def check_migration_safety(self, migration: Migration):
-        for operation in migration.operations:
-            if type(operation) in [
-                RemoveField,
-                RenameField,
-                AddConstraint,
-                AddIndex,
-                RemoveIndex,
-            ]:
-                self.raise_or_warn(operation=operation, migration=migration)
-
-    def raise_or_warn(self, migration: Migration, operation: Operation):
-        safety_assured = getattr(migration, "safety_assured", False)
-
-        error = UnsafeMigrationError(operation=operation, migration=migration)
-        if safety_assured:
-            logger.warn(error.message)
+    def _pg_major_version(self, connection) -> int or None:
+        """
+        returns None if db connection is not a postgres connection
+        major version number otherwise
+        """
+        if connection.settings_dict.get("ENGINE") != "django.db.backends.postgresql":
+            return None
+        try:
+            raw_version = connection.cursor().connection.server_version
+        except Exception as error:
+            logger.warning(
+                "strong_migrations could not determine postgres version number"
+            )
+            logger.warning(error)
             return
-        raise error
+        return int(str(raw_version)[0:2])

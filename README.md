@@ -232,3 +232,13 @@ class Migration(migrations.Migration):
         )
     ]
 ```
+
+## Contributing
+
+### Tests
+
+- In your python 3.7+ virtualenv, run `pip install -r requirements/test.txt`
+
+- In a separate tab, run `docker-compose up` to start the postgres db required for tests.
+
+- `make test`
