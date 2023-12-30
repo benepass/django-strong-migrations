@@ -19,4 +19,15 @@ strong_migrations/check_safety/migration_safety.py
 strong_migrations/errors/__init__.py
 strong_migrations/errors/unsafe_migration_error.py
 strong_migrations/management/commands/migrate.py
+tests/__init__.py
+tests/conftest.py
 tests/test_migrate.py
+tests/check_safety/__init__.py
+tests/check_safety/test_remove_field.py
+tests/fixtures/__init__.py
+tests/mocks/__init__.py
+tests/mocks/mock_model_state.py
+tests/mocks/mock_project_state.py
+tests/mocks/mock_settings.py
+tests/mocks/mock_app/__init__.py
+tests/mocks/mock_app/apps.py

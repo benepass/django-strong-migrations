@@ -10,6 +10,15 @@ from django.db.migrations.operations import (
     RemoveIndex,
 )
 
+__all__ = [
+    "_check_alter_field",
+    "_check_remove_field",
+    "_check_rename_field",
+    "_check_add_constraint",
+    "_check_add_index",
+    "_check_remove_index",
+]
+
 
 def _check_alter_field(operation: AlterField, **kwargs):
     state = kwargs["project_state"]
@@ -57,15 +66,27 @@ def _check_alter_field_index(
 
 
 def _check_remove_field(operation: RemoveField, **kwargs):
-    pass
+    raise UnsafeMigrationError(
+        migration=kwargs["migration"],
+        operation=operation,
+        extra_info=INFO_MESSAGES["remove_field"],
+    )
 
 
 def _check_rename_field(operation: RenameField, **kwargs):
-    pass
+    raise UnsafeMigrationError(
+        migration=kwargs["migration"],
+        operation=operation,
+        extra_info=INFO_MESSAGES["rename_field"],
+    )
 
 
 def _check_add_constraint(operation: AddConstraint, **kwargs):
-    pass
+    raise UnsafeMigrationError(
+        migration=kwargs["migration"],
+        operation=operation,
+        extra_info=INFO_MESSAGES["add_constraint"],
+    )
 
 
 def _check_add_index(operation: AddIndex, **kwargs):

@@ -35,7 +35,6 @@ def check_migration_safety(
     migration: Migration,
     pg_major_version: int | None,
     project_state: ProjectState,
-    safety_assured: bool = False,
 ):
     for operation in migration.operations:
         check_method = OPERATION_CHECKS.get(type(operation))
@@ -53,7 +52,7 @@ def check_migration_safety(
                     operation=operation,
                     extra_info=error.extra_info,
                 )
-                if safety_assured:
+                if getattr(migration, "safety_assured", False):
                     logger.warn(appended_error.message)
                     return
                 raise appended_error from error

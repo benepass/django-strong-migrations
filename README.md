@@ -62,7 +62,7 @@ Renaming a column that's in use will cause application errors in between migrati
 
 ### RemoveField
 
-Removing a field using the standard `RemoveField` operation result in errors in your migration.
+Removing a field using the standard `RemoveField` operation can result in errors in your deployment.
 
 This happens when migrations run before your application has been deployed. Your application will continue referring to the field until it has succesfully been deployed.
 

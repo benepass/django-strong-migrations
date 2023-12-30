@@ -1,1 +1,2 @@
 strong_migrations
+tests

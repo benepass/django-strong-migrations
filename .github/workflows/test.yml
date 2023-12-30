@@ -37,7 +37,6 @@ jobs:
           cache: "pip"
           cache-dependency-path: |
             setup.py
-            tox.ini
             requirements/*.txt
 
       - name: Install dependencies
