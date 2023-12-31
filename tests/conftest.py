@@ -24,7 +24,7 @@ def test_path():
 
 @pytest.fixture()
 def run_test_app_db(test_app_path):
-    def _run(command: str, postgres: bool = False):
+    def _run(command: str, appname="testapp", postgres: bool = False):
         env_vars = os.environ.copy()
         args = command.split(" ")
 
@@ -32,7 +32,7 @@ def run_test_app_db(test_app_path):
             env_vars["DB"] = "postgres"
 
         subprocess.run(
-            args=["python", "./manage.py", "migrate", "testapp", "0001"],
+            args=["python", "./manage.py", "migrate", appname, "zero"],
             cwd=test_app_path,
             env=env_vars,
         )
@@ -46,7 +46,7 @@ def run_test_app_db(test_app_path):
         )
         yield result
         subprocess.run(
-            args=["python", "./manage.py", "migrate", "testapp", "0001"],
+            args=["python", "./manage.py", "migrate", appname, "zero"],
             cwd=test_app_path,
             env=env_vars,
         )

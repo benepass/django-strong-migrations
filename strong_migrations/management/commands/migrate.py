@@ -9,7 +9,7 @@ from django.core.management.commands.migrate import (
 )
 
 from django.db.migrations.loader import AmbiguityError
-from django.core.management.base import CommandError
+from django.core.management.base import CommandError, CommandParser
 from django.db.migrations.executor import MigrationExecutor
 from strong_migrations.check_safety import check_migration_safety
 from django.conf import settings
@@ -19,10 +19,21 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseMigrateCommand):
+    def add_arguments(self, parser: CommandParser) -> None:
+        parser.add_argument(
+            "--skip-strong-migrations",
+            action="store_true",
+            help="skip django-strong-migration checks",
+        )
+        return super().add_arguments(parser)
+
     def handle(self, *args: Any, **options: Any) -> Optional[str]:
         database = options["database"]
         if not options["skip_checks"]:
             self.check(databases=[database])
+
+        if options["skip_strong_migrations"]:
+            return super().handle(*args, **options)
 
         self.verbosity = options["verbosity"]
         self.interactive = options["interactive"]
@@ -107,6 +118,8 @@ class Command(BaseMigrateCommand):
                     project_state=pre_migrate_state,
                     pg_major_version=self._pg_major_version(connection),
                 )
+                for operation in migration.operations:
+                    operation.state_forwards(migration.app_label, pre_migrate_state)
 
         # now we need to reset our migration state so that the real migrate command
         # actually runs everything it needs

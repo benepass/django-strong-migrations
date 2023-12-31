@@ -31,7 +31,7 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-INSTALLED_APPS = ["testapp", "strong_migrations"]
+INSTALLED_APPS = ["testapp", "legacyapp", "strong_migrations"]
 
 MIDDLEWARE = []
 

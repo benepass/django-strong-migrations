@@ -26,10 +26,7 @@ def _check_alter_field(operation: AlterField, **kwargs):
     pg_version = kwargs["pg_major_version"]
 
     old_model_state = state.models[(migration.app_label, operation.model_name)]
-    if old_model_state:
-        old_field_state = old_model_state.fields.get(operation.name)
-    else:
-        old_field_state = None
+    old_field_state = old_model_state.fields.get(operation.name)
 
     if operation.field.db_index is True:
         _check_alter_field_index(

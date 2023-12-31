@@ -42,12 +42,6 @@ class MyApp(AppConfig):
 
 If you set `safety_assured=True` on a migration, **checks are not run on any operation in that migration**. You may intend to mark one operation as safe, and miss a warning on another operation. Use with caution.
 
-### Running multiple migrations at once
-
-If you have an `AlterField` operation that does something dangerous (like add an index), and you run it at the same time as a prior migration that added that field, this state change won't get picked up, and you could run an unsafe migration in prod.
-
-It's safest to avoid running multiple migrations in the same command if they alter the same field.
-
 ## Unsafe Migrations
 
 Potentially dangerous operations:
