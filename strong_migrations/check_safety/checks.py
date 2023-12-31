@@ -61,7 +61,7 @@ def _check_alter_field_index(
         raise UnsafeMigrationError(
             migration=migration,
             operation=operation,
-            extra_info=INFO_MESSAGES["pg_alter_field_add_index"],
+            extra_info=INFO_MESSAGES["add_index"],
         )
 
 
@@ -82,6 +82,8 @@ def _check_rename_field(operation: RenameField, **kwargs):
 
 
 def _check_add_constraint(operation: AddConstraint, **kwargs):
+    if not kwargs.get("pg_major_version"):
+        return
     raise UnsafeMigrationError(
         migration=kwargs["migration"],
         operation=operation,
@@ -90,8 +92,20 @@ def _check_add_constraint(operation: AddConstraint, **kwargs):
 
 
 def _check_add_index(operation: AddIndex, **kwargs):
-    pass
+    if not kwargs.get("pg_major_version"):
+        return
+    raise UnsafeMigrationError(
+        migration=kwargs["migration"],
+        operation=operation,
+        extra_info=INFO_MESSAGES["add_index"],
+    )
 
 
 def _check_remove_index(operation: RemoveIndex, **kwargs):
-    pass
+    if not kwargs.get("pg_major_version"):
+        return
+    raise UnsafeMigrationError(
+        migration=kwargs["migration"],
+        operation=operation,
+        extra_info=INFO_MESSAGES["remove_index"],
+    )

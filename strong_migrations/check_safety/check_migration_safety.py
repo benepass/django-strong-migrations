@@ -47,14 +47,9 @@ def check_migration_safety(
                     migration=migration,
                 )
             except UnsafeMigrationError as error:
-                appended_error = UnsafeMigrationError(
-                    migration=migration,
-                    operation=operation,
-                    extra_info=error.extra_info,
-                )
                 if getattr(migration, "safety_assured", False):
-                    logger.warn(appended_error.message)
+                    logger.warn(error.message)
                     return
-                raise appended_error from error
+                raise error
 
     return True
