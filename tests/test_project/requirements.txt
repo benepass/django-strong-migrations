@@ -1,2 +1,2 @@
 ../../../django-strong-migrations/
-psycopg2==2.8.5
+psycopg2==3.1.16
