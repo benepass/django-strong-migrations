@@ -1,2 +1,2 @@
-/Users/agarrow/bp/django-strong-migrations/
+../../../django-strong-migrations/
 psycopg2==2.8.5
