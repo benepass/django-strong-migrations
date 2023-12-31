@@ -1,14 +1,9 @@
-from strong_migrations.errors import UnsafeMigrationError
-from strong_migrations.check_safety.info_messages import INFO_MESSAGES
+from django.db.migrations.operations import (AddConstraint, AddIndex,
+                                             AlterField, RemoveField,
+                                             RemoveIndex, RenameField)
 
-from django.db.migrations.operations import (
-    AddConstraint,
-    AddIndex,
-    AlterField,
-    RenameField,
-    RemoveField,
-    RemoveIndex,
-)
+from strong_migrations.check_safety.info_messages import INFO_MESSAGES
+from strong_migrations.errors import UnsafeMigrationError
 
 __all__ = [
     "_check_alter_field",

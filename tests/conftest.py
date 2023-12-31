@@ -1,15 +1,17 @@
-from typing import Optional
-import pytest
 import os
+import re
 import subprocess
 from importlib import import_module
-from tests.mocks import MockProjectState, MockModelState
-from strong_migrations.check_safety import check_migration_safety
-from strong_migrations.errors import UnsafeMigrationError
-from strong_migrations.check_safety.info_messages import INFO_MESSAGES
-import re
-from django.db import models
+from typing import Optional
+
+import pytest
 from django.apps.registry import apps
+from django.db import models
+
+from strong_migrations.check_safety import check_migration_safety
+from strong_migrations.check_safety.info_messages import INFO_MESSAGES
+from strong_migrations.errors import UnsafeMigrationError
+from tests.mocks import MockModelState, MockProjectState
 
 
 @pytest.fixture

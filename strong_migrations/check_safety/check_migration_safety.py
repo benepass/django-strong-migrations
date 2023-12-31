@@ -1,24 +1,16 @@
-from typing import Optional
-from django.db.migrations.operations import (
-    AddConstraint,
-    AddIndex,
-    AlterField,
-    RenameField,
-    RemoveField,
-    RemoveIndex,
-)
-from django.db.migrations import Migration
-from django.db.migrations.state import ProjectState
-from .checks import (
-    _check_add_constraint,
-    _check_add_index,
-    _check_alter_field,
-    _check_rename_field,
-    _check_remove_field,
-    _check_remove_index,
-)
-from ..errors import UnsafeMigrationError
 import logging
+from typing import Optional
+
+from django.db.migrations import Migration
+from django.db.migrations.operations import (AddConstraint, AddIndex,
+                                             AlterField, RemoveField,
+                                             RemoveIndex, RenameField)
+from django.db.migrations.state import ProjectState
+
+from ..errors import UnsafeMigrationError
+from .checks import (_check_add_constraint, _check_add_index,
+                     _check_alter_field, _check_remove_field,
+                     _check_remove_index, _check_rename_field)
 
 logger = logging.getLogger(__name__)
 

@@ -1,19 +1,16 @@
-import os
-import re
-import sys
-from typing import Any, Optional
-from django.db import connections
-from django.apps import apps
-from django.core.management.commands.migrate import (
-    Command as BaseMigrateCommand,
-)
-
-from django.db.migrations.loader import AmbiguityError
-from django.core.management.base import CommandError, CommandParser
-from django.db.migrations.executor import MigrationExecutor
-from strong_migrations.check_safety import check_migration_safety
-from django.conf import settings
 import logging
+import re
+from typing import Any, Optional
+
+from django.apps import apps
+from django.core.management.base import CommandError, CommandParser
+from django.core.management.commands.migrate import \
+    Command as BaseMigrateCommand
+from django.db import connections
+from django.db.migrations.executor import MigrationExecutor
+from django.db.migrations.loader import AmbiguityError
+
+from strong_migrations.check_safety import check_migration_safety
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +64,6 @@ class Command(BaseMigrateCommand):
                         % (migration_name, app_label)
                     )
                 targets = [(app_label, migration.name)]
-            target_app_labels_only = False
         elif options["app_label"]:
             app_label = options["app_label"]
             targets = [
@@ -94,7 +90,9 @@ class Command(BaseMigrateCommand):
                     app_label=app_label, name_prefix=check_from
                 )
             except Exception as e:
-                raise RuntimeError(f"Failed to load starting migration {check_from}")
+                raise RuntimeError(
+                    f"Failed to load starting migration {check_from}"
+                ) from e
             starting_targets.append((app_label, check_from))
 
         starting_plan = None
