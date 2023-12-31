@@ -13,6 +13,7 @@ jobs:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12-dev"]
         django-version: ["3.2", "4.1", "4.2", "main"]
+        psycopg-version: ["2", "3"]
 
         exclude:
           - python-version: "3.8"
@@ -24,8 +25,14 @@ jobs:
           - python-version: "3.11"
             django-version: "3.2"
 
+          - python-version: "3.11"
+            psycopg-version: "2"
+
           - python-version: "3.12-dev"
             django-version: "3.2"
+
+          - python-version: "3.12-dev"
+            psycopg-version: "2"
 
     services:
       postgres:
