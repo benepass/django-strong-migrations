@@ -44,15 +44,9 @@ def _check_alter_field_index(
     if not pg_version:
         return
 
-    if not old_model_state:
-        # if the model hadn't previously existed in the db
-        # we don't need to worry about an index locking the table
-        # since it isn't in use or populated yet
-        return
-
     if (
         pg_version
-        and (old_field_state is None or old_field_state.db_index is False)
+        and old_field_state.db_index is False
         and operation.field.db_index is True
     ):
         raise UnsafeMigrationError(
