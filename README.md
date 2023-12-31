@@ -36,6 +36,32 @@ class MyApp(AppConfig):
         import my_app.signals
 ```
 
+## Marking Migrations as Safe
+
+you can ignore the error and run the migration anyways by setting `safety_assured=True` in your migration like so:
+
+```python
+# unsafe migration
+class Migration(migrations.Migration):
+
+    safety_assured = True
+
+    dependencies = [
+        ('api', 'prior_migration'),
+    ]
+
+    operations = [
+        migrations.RemoveField(
+            model_name='user',
+            name='my_field',
+        )
+    ]
+```
+
+## Forcing Migrations Through
+
+In a pinch you can use the flag `--skip-strong-migrations` to skip safety checks, but these checks will still be run in your test env until you resolve the issue or mark the migration as safe.
+
 ## Caveats
 
 ### safety_assured
@@ -214,28 +240,6 @@ class Migration(migrations.Migration):
                 fields=["name"], name="name_idx"
             ),
         ),
-    ]
-```
-
-## Marking Migrations as Safe
-
-you can ignore the error and run the migration anyways by setting `safety_assured=True` in your migration like so:
-
-```python
-# unsafe migration
-class Migration(migrations.Migration):
-
-    safety_assured = True
-
-    dependencies = [
-        ('api', 'prior_migration'),
-    ]
-
-    operations = [
-        migrations.RemoveField(
-            model_name='user',
-            name='my_field',
-        )
     ]
 ```
 
