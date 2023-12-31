@@ -32,7 +32,7 @@ def run_test_app_db(test_app_path):
             env_vars["DB"] = "postgres"
 
         subprocess.run(
-            args=["python", "./manage.py", "migrate", appname, "zero"],
+            args=["python", "manage.py", "migrate", appname, "zero"],
             cwd=test_app_path,
             env=env_vars,
         )
@@ -46,7 +46,7 @@ def run_test_app_db(test_app_path):
         )
         yield result
         subprocess.run(
-            args=["python", "./manage.py", "migrate", appname, "zero"],
+            args=["python", "manage.py", "migrate", appname, "zero"],
             cwd=test_app_path,
             env=env_vars,
         )
