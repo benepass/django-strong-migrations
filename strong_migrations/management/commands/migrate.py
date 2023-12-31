@@ -1,7 +1,7 @@
 import os
 import re
 import sys
-from typing import Any
+from typing import Any, Optional
 from django.db import connections
 from django.apps import apps
 from django.core.management.commands.migrate import (
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseMigrateCommand):
-    def handle(self, *args: Any, **options: Any) -> str | None:
+    def handle(self, *args: Any, **options: Any) -> Optional[str]:
         database = options["database"]
         if not options["skip_checks"]:
             self.check(databases=[database])

@@ -1,3 +1,4 @@
+from typing import Optional
 from django.db.migrations.operations import (
     AddConstraint,
     AddIndex,
@@ -33,7 +34,7 @@ OPERATION_CHECKS = {
 
 def check_migration_safety(
     migration: Migration,
-    pg_major_version: int | None,
+    pg_major_version: Optional[int],
     project_state: ProjectState,
 ):
     for operation in migration.operations:

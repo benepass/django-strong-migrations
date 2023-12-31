@@ -1,3 +1,4 @@
+from typing import Optional
 import pytest
 import os
 import subprocess
@@ -105,8 +106,8 @@ def setup_migration_state(
 def assert_unsafe(setup_migration_state):
     def _factory(
         migration_name: str,
-        info_message: str | None = None,
-        pg_version: int | None = None,
+        info_message: Optional[str] = None,
+        pg_version: Optional[int] = None,
     ):
         info_message = info_message or migration_name
         migration, pre_migration_state = setup_migration_state(
@@ -128,7 +129,7 @@ def assert_unsafe(setup_migration_state):
 def assert_safe(setup_migration_state):
     def _factory(
         migration_name: str,
-        pg_version: int | None = None,
+        pg_version: Optional[int] = None,
     ):
         migration, pre_migration_state = setup_migration_state(
             migration_name=migration_name
