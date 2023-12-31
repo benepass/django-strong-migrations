@@ -247,8 +247,20 @@ class Migration(migrations.Migration):
 
 ### Tests
 
-- In your python 3.7+ virtualenv, run `pip install -r requirements/test.txt`
+- In your python 3.8+ virtualenv, run `pip install -r requirements/test.txt`
+- Install your target Django version `pip install Django==4.2`
 
 - In a separate tab, run `docker-compose up` to start the postgres db required for tests.
 
 - `make test`
+
+### Versioning
+
+This package uses the [semver](https://semver.org/) versioning system.
+
+Please make sure to update the version accordingly in `setup.cfg`, and run `python setup.py sdist` to update the version in your PR.
+
+## Credits
+
+authored by @AGarrow
+maintained with love by [Benepass](https://www.getbenepass.com/)
