@@ -129,11 +129,22 @@ class Command(BaseMigrateCommand):
         if connection.settings_dict.get("ENGINE") != "django.db.backends.postgresql":
             return None
         try:
-            raw_version = connection.cursor().connection.server_version
+            # unfortunately, connection.cursor().connection.server_version does not work
+            # with psycopg 3, which is required for python 3.11+
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT version();")
+                raw_version = cursor.fetchone()
+            if not raw_version:
+                raise Exception("could not find version number")
+            match = re.search("PostgreSQL (\d+)\.\d{1,}", raw_version[0])
+            if not match:
+                raise Exception(
+                    f"could not find version number from verson string {raw_version[0]}"
+                )
+            return int(match.group(1))
         except Exception as error:
             logger.warning(
                 "strong_migrations could not determine postgres version number"
             )
             logger.warning(error)
             return
-        return int(str(raw_version)[0:2])
