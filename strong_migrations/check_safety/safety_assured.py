@@ -1,7 +1,8 @@
 from django.db.migrations.operations.base import Operation
+from typing import List
 
 
-def safety_assured(*operations: Operation) -> list[Operation]:
+def safety_assured(*operations: Operation) -> List[Operation]:
     """
     accepts operations as arguments, returns a list of operations marked safe
     """
