@@ -4,8 +4,7 @@ from typing import Any, Optional
 
 from django.apps import apps
 from django.core.management.base import CommandError, CommandParser
-from django.core.management.commands.migrate import \
-    Command as BaseMigrateCommand
+from django.core.management.commands.migrate import Command as BaseMigrateCommand
 from django.db import connections
 from django.db.migrations.executor import MigrationExecutor
 from django.db.migrations.loader import AmbiguityError
