@@ -2,18 +2,20 @@
 
 from django.db import migrations
 
+from strong_migrations import safety_assured
+
 
 class Migration(migrations.Migration):
-    safety_assured = True
-
     dependencies = [
         ("legacyapp", "0002_rename_test_field"),
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name="legacymodel",
-            old_name="renamed_test_field",
-            new_name="test_field",
-        ),
+        *safety_assured(
+            migrations.RenameField(
+                model_name="legacymodel",
+                old_name="renamed_test_field",
+                new_name="test_field",
+            )
+        )
     ]

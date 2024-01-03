@@ -38,10 +38,12 @@ class MyApp(AppConfig):
 
 ## Marking Migrations as Safe
 
-you can ignore the error and run the migration anyways by setting `safety_assured=True` in your migration like so:
+you can skip checks on an operation or operations using the
 
 ```python
-# unsafe migration
+
+from strong_migrations import safety_assured
+
 class Migration(migrations.Migration):
 
     safety_assured = True
@@ -51,22 +53,20 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='user',
-            name='my_field',
-        )
+        # you can pass in any number of operations
+        *safety_assured(
+            migrations.RemoveField(
+                model_name='user',
+                name='my_field',
+            )
+        ),
+        migrations.AddField(...),
     ]
 ```
 
 ## Forcing Migrations Through
 
 In a pinch you can use the flag `--skip-strong-migrations` to skip safety checks, but these checks will still be run in your test env until you resolve the issue or mark the migration as safe.
-
-## Caveats
-
-### safety_assured
-
-If you set `safety_assured=True` on a migration, **checks are not run on any operation in that migration**. You may intend to mark one operation as safe, and miss a warning on another operation. Use with caution.
 
 ## Unsafe Migrations
 

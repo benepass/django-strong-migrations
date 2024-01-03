@@ -50,8 +50,15 @@ def check_migration_safety(
                     migration=migration,
                 )
             except UnsafeMigrationError as error:
-                if getattr(migration, "safety_assured", False):
-                    logger.warn(error.message)
+                if getattr(operation, "safety_assured", False):
+                    operation_name = operation.__class__.__name__
+                    logger.warn(
+                        (
+                            "operation marked as safe: "
+                            f"(migration: {migration.name}, "
+                            f"operation: {operation_name})"
+                        )
+                    )
                     return
                 raise error
 
