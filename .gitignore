@@ -1,1 +1,4 @@
 build/*
+docker/*
+db.sqlite3
+dist/

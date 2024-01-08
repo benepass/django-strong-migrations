@@ -1,33 +1,35 @@
-import os
-import re
-import sys
-from typing import Any
-from django.db import connections
-from django.apps import apps
-from django.core.management.commands.migrate import (
-    Command as BaseMigrateCommand,
-)
-from django.db.migrations.operations.fields import (
-    RemoveField,
-    RenameField,
-)
-from django.db.migrations.operations.models import AddConstraint, AddIndex, RemoveIndex
-from django.db.migrations.operations.base import Operation
-from django.db.migrations.migration import Migration
-from django.db.migrations.loader import AmbiguityError
-from django.core.management.base import CommandError
-from django.db.migrations.executor import MigrationExecutor
-from strong_migrations.errors.unsafe_migration_error import UnsafeMigrationError
 import logging
+import re
+from typing import Any, Optional
+
+from django.apps import apps
+from django.core.management.base import CommandError, CommandParser
+from django.core.management.commands.migrate import Command as BaseMigrateCommand
+from django.db import connections
+from django.db.migrations.executor import MigrationExecutor
+from django.db.migrations.loader import AmbiguityError
+
+from strong_migrations.check_safety import check_migration_safety
 
 logger = logging.getLogger(__name__)
 
 
 class Command(BaseMigrateCommand):
-    def handle(self, *args: Any, **options: Any) -> str | None:
+    def add_arguments(self, parser: CommandParser) -> None:
+        parser.add_argument(
+            "--skip-strong-migrations",
+            action="store_true",
+            help="skip django-strong-migration checks",
+        )
+        return super().add_arguments(parser)
+
+    def handle(self, *args: Any, **options: Any) -> Optional[str]:
         database = options["database"]
         if not options["skip_checks"]:
             self.check(databases=[database])
+
+        if options["skip_strong_migrations"]:
+            return super().handle(*args, **options)
 
         self.verbosity = options["verbosity"]
         self.interactive = options["interactive"]
@@ -61,7 +63,6 @@ class Command(BaseMigrateCommand):
                         % (migration_name, app_label)
                     )
                 targets = [(app_label, migration.name)]
-            target_app_labels_only = False
         elif options["app_label"]:
             app_label = options["app_label"]
             targets = [
@@ -88,7 +89,9 @@ class Command(BaseMigrateCommand):
                     app_label=app_label, name_prefix=check_from
                 )
             except Exception as e:
-                raise RuntimeError(f"Failed to load starting migration {check_from}")
+                raise RuntimeError(
+                    f"Failed to load starting migration {check_from}"
+                ) from e
             starting_targets.append((app_label, check_from))
 
         starting_plan = None
@@ -103,10 +106,17 @@ class Command(BaseMigrateCommand):
 
         # now we can check the actual migrations we need
         plan = executor.migration_plan(targets)
+        pre_migrate_state = executor._create_project_state(with_applied_migrations=True)
 
         for migration, is_backwards in plan:
             if not is_backwards:
-                self.check_migration_safety(migration)
+                check_migration_safety(
+                    migration=migration,
+                    project_state=pre_migrate_state,
+                    pg_major_version=self._pg_major_version(connection),
+                )
+                for operation in migration.operations:
+                    operation.state_forwards(migration.app_label, pre_migrate_state)
 
         # now we need to reset our migration state so that the real migrate command
         # actually runs everything it needs
@@ -121,22 +131,30 @@ class Command(BaseMigrateCommand):
         executor.migration_plan(targets)
         return super().handle(*args, **options)
 
-    def check_migration_safety(self, migration: Migration):
-        for operation in migration.operations:
-            if type(operation) in [
-                RemoveField,
-                RenameField,
-                AddConstraint,
-                AddIndex,
-                RemoveIndex,
-            ]:
-                self.raise_or_warn(operation=operation, migration=migration)
-
-    def raise_or_warn(self, migration: Migration, operation: Operation):
-        safety_assured = getattr(migration, "safety_assured", False)
-
-        error = UnsafeMigrationError(operation=operation, migration=migration)
-        if safety_assured:
-            logger.warn(error.message)
+    def _pg_major_version(self, connection) -> int or None:
+        """
+        returns None if db connection is not a postgres connection
+        major version number otherwise
+        """
+        if connection.settings_dict.get("ENGINE") != "django.db.backends.postgresql":
+            return None
+        try:
+            # unfortunately, connection.cursor().connection.server_version does not work
+            # with psycopg 3, which is required for python 3.11+
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT version();")
+                raw_version = cursor.fetchone()
+            if not raw_version:
+                raise Exception("could not find version number")
+            match = re.search("PostgreSQL (\d+)\.\d{1,}", raw_version[0])
+            if not match:
+                raise Exception(
+                    f"could not find version number from verson string {raw_version[0]}"
+                )
+            return int(match.group(1))
+        except Exception as error:
+            logger.warning(
+                "strong_migrations could not determine postgres version number"
+            )
+            logger.warning(error)
             return
-        raise error

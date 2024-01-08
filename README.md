@@ -36,6 +36,38 @@ class MyApp(AppConfig):
         import my_app.signals
 ```
 
+## Marking Migrations as Safe
+
+you can skip checks on an operation or operations using the
+
+```python
+
+from strong_migrations import safety_assured
+
+class Migration(migrations.Migration):
+
+    safety_assured = True
+
+    dependencies = [
+        ('api', 'prior_migration'),
+    ]
+
+    operations = [
+        # you can pass in any number of operations
+        *safety_assured(
+            migrations.RemoveField(
+                model_name='user',
+                name='my_field',
+            )
+        ),
+        migrations.AddField(...),
+    ]
+```
+
+## Forcing Migrations Through
+
+In a pinch you can use the flag `--skip-strong-migrations` to skip safety checks, but these checks will still be run in your test env until you resolve the issue or mark the migration as safe.
+
 ## Unsafe Migrations
 
 Potentially dangerous operations:
@@ -62,7 +94,7 @@ Renaming a column that's in use will cause application errors in between migrati
 
 ### RemoveField
 
-Removing a field using the standard `RemoveField` operation result in errors in your migration.
+Removing a field using the standard `RemoveField` operation can result in errors in your deployment.
 
 This happens when migrations run before your application has been deployed. Your application will continue referring to the field until it has succesfully been deployed.
 
@@ -211,24 +243,24 @@ class Migration(migrations.Migration):
     ]
 ```
 
-## Marking Migrations as Safe
+## Contributing
 
-you can ignore the error and run the migration anyways by setting `safety_assured=True` in your migration like so:
+### Tests
 
-```python
-# unsafe migration
-class Migration(migrations.Migration):
+- In your python 3.8+ virtualenv, run `pip install -r requirements/test.txt`
+- Install your target Django version `pip install Django==4.2`
 
-    safety_assured = True
+- In a separate tab, run `docker-compose up` to start the postgres db required for tests.
 
-    dependencies = [
-        ('api', 'prior_migration'),
-    ]
+- `make test`
 
-    operations = [
-        migrations.RemoveField(
-            model_name='user',
-            name='my_field',
-        )
-    ]
-```
+### Versioning
+
+This package uses the [semver](https://semver.org/) versioning system.
+
+Please make sure to update the version accordingly in `setup.cfg`, and run `python setup.py sdist` to update the version in your PR.
+
+## Credits
+
+authored by @AGarrow
+maintained with love by [Benepass](https://www.getbenepass.com/)
