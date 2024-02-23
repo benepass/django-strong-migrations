@@ -2,7 +2,6 @@ import pytest
 
 from strong_migrations.set_lock_timeout import (
     set_lock_timeout_from_settings,
-    reset_lock_timeout_from_settings,
 )
 from strong_migrations.errors import InvalidConfigurationError
 

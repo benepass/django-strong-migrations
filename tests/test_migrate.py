@@ -1,9 +1,7 @@
-import pytest
 from threading import Thread
 
 from django.db import connection
 import os
-from asgiref.sync import sync_to_async
 
 
 def test_migrate_command_with_safe_migrations(run_test_app_db, test_app_path):
