@@ -140,7 +140,7 @@ class Command(BaseMigrateCommand):
             connection=connection, settings=settings, pg_version=pg_version
         )
         result = super().handle(*args, **options)
-        set_lock_timeout_from_settings(connection=connection, settings=settings)
+        reset_lock_timeout_from_settings(connection=connection, settings=settings)
         return result
 
     def reset_transaction_lock_timeout(self, connection, pg_version):
