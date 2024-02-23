@@ -94,6 +94,9 @@ def hold_lock_on_legacymodel():
 
 
 def test_migrate_with_lock_timeout(run_test_app_db):
+    if os.environ.get("DB") != "postgres":
+        assert True
+
     for result in run_test_app_db(
         command="python manage.py migrate legacyapp 0001",
         appname="legacyapp",

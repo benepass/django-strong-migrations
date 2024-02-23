@@ -11,7 +11,7 @@ from django.db import models
 from strong_migrations.check_safety import check_migration_safety
 from strong_migrations.check_safety.info_messages import INFO_MESSAGES
 from strong_migrations.errors import UnsafeMigrationError
-from tests.mocks import MockModelState, MockProjectState
+from tests.mocks import MockModelState, MockProjectState, MockConnection
 
 
 @pytest.fixture
@@ -142,6 +142,11 @@ def make_user_model():
         return User
 
     return _factory
+
+
+@pytest.fixture
+def mock_connection():
+    return MockConnection()
 
 
 @pytest.fixture
