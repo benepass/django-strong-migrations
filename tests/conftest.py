@@ -70,18 +70,26 @@ def test_path():
 
 @pytest.fixture()
 def run_test_app_db(test_app_path):
-    def _run(command: str, appname="testapp", postgres: bool = False):
+    def _run(
+        command: str,
+        appname="testapp",
+        postgres: bool = False,
+        reset_before=True,
+        reset_after=True,
+    ):
         env_vars = os.environ.copy()
         args = command.split(" ")
 
         if postgres:
             env_vars["DB"] = "postgres"
+        env_vars.pop("DJANGO_SETTINGS_MODULE", None)
 
-        subprocess.run(
-            args=["python", "manage.py", "migrate", appname, "zero"],
-            cwd=test_app_path,
-            env=env_vars,
-        )
+        if reset_before:
+            subprocess.run(
+                args=["python", "manage.py", "migrate", appname, "zero"],
+                cwd=test_app_path,
+                env=env_vars,
+            )
         result = subprocess.run(
             args=args,
             cwd=test_app_path,
@@ -91,11 +99,12 @@ def run_test_app_db(test_app_path):
             text=True,
         )
         yield result
-        subprocess.run(
-            args=["python", "manage.py", "migrate", appname, "zero"],
-            cwd=test_app_path,
-            env=env_vars,
-        )
+        if reset_after:
+            subprocess.run(
+                args=["python", "manage.py", "migrate", appname, "zero"],
+                cwd=test_app_path,
+                env=env_vars,
+            )
 
     return _run
 

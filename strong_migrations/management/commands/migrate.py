@@ -143,10 +143,6 @@ class Command(BaseMigrateCommand):
         reset_lock_timeout_from_settings(connection=connection, settings=settings)
         return result
 
-    def reset_transaction_lock_timeout(self, connection, pg_version):
-        with connection.cursor() as cursor:
-            cursor.execute("set lock_timeout to '0s';")
-
     def _pg_major_version(self, connection) -> int or None:
         """
         returns None if db connection is not a postgres connection

@@ -1,6 +1,6 @@
 from strong_migrations.errors import InvalidConfigurationError
 
-DEFAULT_TIMEOUT = "Os"
+DEFAULT_TIMEOUT = "0s"
 
 
 def set_lock_timeout_from_settings(*, connection, settings, pg_version):
@@ -21,4 +21,4 @@ def reset_lock_timeout_from_settings(*, connection, settings):
 
 def set_lock_timeout(*, connection, timeout: str):
     with connection.cursor() as cursor:
-        cursor.execute("set lock_timeout to '{lock_timeout}';")
+        cursor.execute(f"set lock_timeout to '{timeout}';")
