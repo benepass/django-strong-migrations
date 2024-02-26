@@ -71,6 +71,7 @@ def run_test_migrate_command_with_skip_safety_checks(run_test_app_db):
 
 def hold_lock_on_legacymodel():
     original_settings_module = os.environ.get("DJANGO_SETTINGS_MODULE", None)
+    os.environ["DB"] = "postgres"
     os.environ["DJANGO_SETTINGS_MODULE"] = "tests.test_project.test_project.settings"
     try:
         # STRONG_MIGRATIONS_LOCK_TIMEOUT is set to 1s in the test app
@@ -85,6 +86,7 @@ def hold_lock_on_legacymodel():
                     """
             )
     finally:
+        os.environ.pop("DB", None)
         if not original_settings_module:
             os.environ.pop("DJANGO_SETTINGS_MODULE")
         else:

@@ -21,3 +21,4 @@ strong_migrations/errors/__init__.py
 strong_migrations/errors/invalid_configuration_error.py
 strong_migrations/errors/unsafe_migration_error.py
 strong_migrations/management/commands/migrate.py
+tests/test_set_lock_timeout.py

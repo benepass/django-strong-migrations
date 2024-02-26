@@ -37,6 +37,12 @@ INSTALLED_APPS = [
 ]
 ```
 
+2. If you want to set a lock timeout for your migrations, set
+
+`STRONG_MIGRATIONS_LOCK_TIMEOUT = "2s"` in your `settings.py` file.
+
+Where "2s" is the length of time you want your migration to wait to acquire a lock before failing.
+
 ## Ignoring Existing Files
 
 Often times users installing this package will have a set of migrations that have already been applied which do not need to be checked for safety.
