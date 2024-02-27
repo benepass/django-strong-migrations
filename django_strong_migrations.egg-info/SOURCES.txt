@@ -11,11 +11,14 @@ django_strong_migrations.egg-info/requires.txt
 django_strong_migrations.egg-info/top_level.txt
 strong_migrations/__init__.py
 strong_migrations/apps.py
+strong_migrations/set_lock_timeout.py
 strong_migrations/check_safety/__init__.py
 strong_migrations/check_safety/check_migration_safety.py
 strong_migrations/check_safety/checks.py
 strong_migrations/check_safety/info_messages.py
 strong_migrations/check_safety/safety_assured.py
 strong_migrations/errors/__init__.py
+strong_migrations/errors/invalid_configuration_error.py
 strong_migrations/errors/unsafe_migration_error.py
 strong_migrations/management/commands/migrate.py
+tests/test_set_lock_timeout.py

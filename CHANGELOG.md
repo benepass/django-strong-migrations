@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.0-pre2]
+
+### Added
+
+- Added ability to set STRONG_MIGRATIONS_LOCK_TIMEOUT
+
 ## [1.0.0-pre1]
 
 ### Added

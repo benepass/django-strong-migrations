@@ -3,6 +3,7 @@ import re
 from typing import Any, Optional
 
 from django.apps import apps
+from django.conf import settings
 from django.core.management.base import CommandError, CommandParser
 from django.core.management.commands.migrate import Command as BaseMigrateCommand
 from django.db import connections
@@ -10,6 +11,10 @@ from django.db.migrations.executor import MigrationExecutor
 from django.db.migrations.loader import AmbiguityError
 
 from strong_migrations.check_safety import check_migration_safety
+from strong_migrations.set_lock_timeout import (
+    set_lock_timeout_from_settings,
+    reset_lock_timeout_from_settings,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -108,12 +113,13 @@ class Command(BaseMigrateCommand):
         plan = executor.migration_plan(targets)
         pre_migrate_state = executor._create_project_state(with_applied_migrations=True)
 
+        pg_version = self._pg_major_version(connection=connection)
         for migration, is_backwards in plan:
             if not is_backwards:
                 check_migration_safety(
                     migration=migration,
                     project_state=pre_migrate_state,
-                    pg_major_version=self._pg_major_version(connection),
+                    pg_major_version=pg_version,
                 )
                 for operation in migration.operations:
                     operation.state_forwards(migration.app_label, pre_migrate_state)
@@ -129,7 +135,13 @@ class Command(BaseMigrateCommand):
                 executor.loader.build_graph()
 
         executor.migration_plan(targets)
-        return super().handle(*args, **options)
+
+        set_lock_timeout_from_settings(
+            connection=connection, settings=settings, pg_version=pg_version
+        )
+        result = super().handle(*args, **options)
+        reset_lock_timeout_from_settings(connection=connection, settings=settings)
+        return result
 
     def _pg_major_version(self, connection) -> int or None:
         """
