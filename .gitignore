@@ -2,3 +2,5 @@ build/*
 docker/*
 db.sqlite3
 dist/
+
+__pycache__

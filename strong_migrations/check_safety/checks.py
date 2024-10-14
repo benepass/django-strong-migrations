@@ -1,5 +1,6 @@
 from django.db.migrations.operations import (
     AddConstraint,
+    AddField,
     AddIndex,
     AlterField,
     RemoveField,
@@ -12,12 +13,23 @@ from strong_migrations.errors import UnsafeMigrationError
 
 __all__ = [
     "_check_alter_field",
+    "_check_add_field",
     "_check_remove_field",
     "_check_rename_field",
     "_check_add_constraint",
     "_check_add_index",
     "_check_remove_index",
 ]
+
+
+def _check_add_field(operation: AddField, **kwargs):
+    if operation.field.null or getattr(operation.field, "db_default", None):
+        return
+    raise UnsafeMigrationError(
+        migration=kwargs["migration"],
+        operation=operation,
+        extra_info=INFO_MESSAGES["add_non_nullable_field"],
+    )
 
 
 def _check_alter_field(operation: AlterField, **kwargs):

@@ -4,6 +4,7 @@ from typing import Optional
 from django.db.migrations import Migration
 from django.db.migrations.operations import (
     AddConstraint,
+    AddField,
     AddIndex,
     AlterField,
     RemoveField,
@@ -15,6 +16,7 @@ from django.db.migrations.state import ProjectState
 from ..errors import UnsafeMigrationError
 from .checks import (
     _check_add_constraint,
+    _check_add_field,
     _check_add_index,
     _check_alter_field,
     _check_remove_field,
@@ -27,6 +29,7 @@ logger = logging.getLogger(__name__)
 OPERATION_CHECKS = {
     AddConstraint: _check_add_constraint,
     AddIndex: _check_add_index,
+    AddField: _check_add_field,
     AlterField: _check_alter_field,
     RenameField: _check_rename_field,
     RemoveField: _check_remove_field,
