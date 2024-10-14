@@ -7,8 +7,6 @@ from django.db.migrations.operations import (
     RemoveIndex,
     RenameField,
 )
-from django.db.models.fields import NOT_PROVIDED
-
 from strong_migrations.check_safety.info_messages import INFO_MESSAGES
 from strong_migrations.errors import UnsafeMigrationError
 
