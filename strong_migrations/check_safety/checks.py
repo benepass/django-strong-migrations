@@ -7,6 +7,7 @@ from django.db.migrations.operations import (
     RemoveIndex,
     RenameField,
 )
+from django.db.models.fields import NOT_PROVIDED
 
 from strong_migrations.check_safety.info_messages import INFO_MESSAGES
 from strong_migrations.errors import UnsafeMigrationError
@@ -23,7 +24,10 @@ __all__ = [
 
 
 def _check_add_field(operation: AddField, **kwargs):
-    if operation.field.null or getattr(operation.field, "db_default", None):
+    db_default = getattr(operation.field, "db_default", None)
+    db_default_set = db_default and db_default.__name__ != "NOT_PROVIDED"
+
+    if operation.field.null or db_default_set:
         return
     raise UnsafeMigrationError(
         migration=kwargs["migration"],
