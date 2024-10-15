@@ -78,6 +78,7 @@ In a pinch you can use the flag `--skip-strong-migrations` to skip safety checks
 
 Potentially dangerous operations:
 
+- [adding a non-nullable field](#addfield)
 - [renaming a field](#renamefield)
 - [removing a field](#removefield)
 
@@ -86,6 +87,21 @@ Postgres-specific checks:
 - [adding a constraint](#addconstraint)
 - [adding an index](#addindex)
 - [removing an index](#removeindex)
+
+### AddField
+
+Adding a non-nullable field is not safe, even with a default value.
+
+Django will set the default value at the db level only until the column has been added,
+and then it will be removed and exist only in the ORM.
+
+The safe migration path is:
+
+1. add the column as nullable with a default value
+2. backfill the existing null values
+3. make the column not nullable using the safe migration procedure for that.
+
+In Django 5.x you can also use db_default to set a db default safely.
 
 ### RenameField
 

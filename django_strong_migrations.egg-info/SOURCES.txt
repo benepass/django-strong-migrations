@@ -20,5 +20,8 @@ strong_migrations/check_safety/safety_assured.py
 strong_migrations/errors/__init__.py
 strong_migrations/errors/invalid_configuration_error.py
 strong_migrations/errors/unsafe_migration_error.py
+strong_migrations/errors/__pycache__/__init__.cpython-312.pyc
+strong_migrations/errors/__pycache__/invalid_configuration_error.cpython-312.pyc
+strong_migrations/errors/__pycache__/unsafe_migration_error.cpython-312.pyc
 strong_migrations/management/commands/migrate.py
 tests/test_set_lock_timeout.py

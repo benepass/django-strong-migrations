@@ -1,23 +1,37 @@
 from django.db.migrations.operations import (
     AddConstraint,
+    AddField,
     AddIndex,
     AlterField,
     RemoveField,
     RemoveIndex,
     RenameField,
 )
-
 from strong_migrations.check_safety.info_messages import INFO_MESSAGES
 from strong_migrations.errors import UnsafeMigrationError
 
 __all__ = [
     "_check_alter_field",
+    "_check_add_field",
     "_check_remove_field",
     "_check_rename_field",
     "_check_add_constraint",
     "_check_add_index",
     "_check_remove_index",
 ]
+
+
+def _check_add_field(operation: AddField, **kwargs):
+    db_default = getattr(operation.field, "db_default", None)
+    db_default_set = db_default and db_default.__name__ != "NOT_PROVIDED"
+
+    if operation.field.null or db_default_set:
+        return
+    raise UnsafeMigrationError(
+        migration=kwargs["migration"],
+        operation=operation,
+        extra_info=INFO_MESSAGES["add_non_nullable_field"],
+    )
 
 
 def _check_alter_field(operation: AlterField, **kwargs):

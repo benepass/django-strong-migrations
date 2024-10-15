@@ -60,6 +60,22 @@ INFO_MESSAGES = {
         ]
       """
     ),
+    "add_non_nullable_field": dedent(
+        """
+            Adding a non-nullable field is not safe, even with a default value.
+
+            Django will set the default value at the db level only until the column has been added,
+            and then it will be removed and exist only in the ORM.
+
+            The safe migration path is:
+
+            1. add the column as nullable with a default value
+            2. backfill the existing null values
+            3. make the column not nullable using the safe migration procedure for that.
+
+            In Django 5.x you can also use db_default to set a db default safely.
+        """
+    ),
     "remove_field": dedent(
         """
           Removing a field using the standard `RemoveField` operation can result in errors in your deployment.
