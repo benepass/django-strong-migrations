@@ -49,5 +49,12 @@ def test_check_migration_safety_add_non_nullable_field(assert_unsafe):
     assert_unsafe(migration_name="add_non_nullable_field")
 
 
+def test_check_migration_safety_add_non_nullable_field_with_jsonb_db_default(
+    assert_safe, django_version, assert_unsafe
+):
+    if django_version[0] >= 5:
+        assert_safe(migration_name="add_non_nullable_field_with_jsonb_default")
+
+
 def test_check_migration_safety_add_nullable_field(assert_safe):
     assert_safe(migration_name="add_nullable_field")

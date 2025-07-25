@@ -23,7 +23,10 @@ __all__ = [
 
 def _check_add_field(operation: AddField, **kwargs):
     db_default = getattr(operation.field, "db_default", None)
-    db_default_set = db_default and db_default.__name__ != "NOT_PROVIDED"
+    db_default_set = (
+        db_default is not None
+        and getattr(db_default, "__name__", None) != "NOT_PROVIDED"
+    )
 
     if operation.field.null or db_default_set:
         return

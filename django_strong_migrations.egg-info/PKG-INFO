@@ -1,6 +1,6 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.4
 Name: django-strong-migrations
-Version: 1.0.0rc3
+Version: 1.0.0rc4
 Summary: Catch unsafe migrations in development
 Author: Alexi Garrow
 Author-email: agarrow@getbenepass.com
@@ -21,6 +21,7 @@ Classifier: Topic :: Internet :: WWW/HTTP :: Dynamic Content
 Requires-Python: >=3.8
 License-File: LICENSE
 Requires-Dist: Django>=3.2
+Dynamic: license-file
 
 # Django Strong Migrations
 

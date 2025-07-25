@@ -128,6 +128,13 @@ def make_project_state():
 
 
 @pytest.fixture
+def django_version():
+    import django
+
+    return django.VERSION
+
+
+@pytest.fixture
 def make_user_model():
     def _factory(email_index: bool = False):
         os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tests.mocks.mock_settings")
