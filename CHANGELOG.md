@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.0.pre4]
+
+### Fixed
+
+- Fixed parsing of Django > 5.x `db_default` field on non nullable field additions.
+
+## [1.0.0.pre3]
+
+- Added safety check to adding non-nullable field.
+
 ## [1.0.0-pre2]
 
 ### Added
