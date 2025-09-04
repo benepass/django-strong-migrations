@@ -15,44 +15,54 @@ from tests.mocks import MockModelState, MockProjectState, MockConnection
 
 
 @pytest.fixture
-def assert_unsafe(setup_migration_state):
+def assert_unsafe(setup_migration_state, django_version):
     def _factory(
         migration_name: str,
         info_message: Optional[str] = None,
         pg_version: Optional[int] = None,
+        check_dms_redshift_safety: Optional[bool] = False,
+        model_kwargs: Optional[dict] = {},
     ):
         info_message = info_message or migration_name
         migration, pre_migration_state = setup_migration_state(
-            migration_name=migration_name
+            migration_name=migration_name, model_kwargs=model_kwargs
         )
         with pytest.raises(
             UnsafeMigrationError, match=re.escape(INFO_MESSAGES[info_message])
         ):
             check_migration_safety(
+                apps=apps,
                 migration=migration,
                 pg_major_version=pg_version,
                 project_state=pre_migration_state,
+                check_dms_redshift_safety=check_dms_redshift_safety,
+                django_version=django_version,
             )
 
     return _factory
 
 
 @pytest.fixture
-def assert_safe(setup_migration_state):
+def assert_safe(setup_migration_state, django_version, mock_app):
     def _factory(
         migration_name: str,
         pg_version: Optional[int] = None,
+        check_dms_redshift_safety: Optional[bool] = False,
+        model_kwargs: Optional[dict] = {},
     ):
         migration, pre_migration_state = setup_migration_state(
-            migration_name=migration_name
+            migration_name=migration_name, model_kwargs=model_kwargs
         )
         assert (
             check_migration_safety(
+                apps=apps,
                 migration=migration,
                 pg_major_version=pg_version,
                 project_state=pre_migration_state,
+                check_dms_redshift_safety=check_dms_redshift_safety,
+                django_version=django_version,
             )
-            is None
+            is True
         )
 
     return _factory
@@ -135,13 +145,22 @@ def django_version():
 
 
 @pytest.fixture
-def make_user_model():
-    def _factory(email_index: bool = False):
+def make_user_model(django_version):
+    def _factory(
+        email_index: bool = False, check_dms_redshift_safety: Optional[bool] = None
+    ):
         os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tests.mocks.mock_settings")
 
         class User(models.Model):
+            if check_dms_redshift_safety is not None:
+                STRONG_MIGRATIONS_CHECK_DMS_REDSHIFT_SAFETY = check_dms_redshift_safety
             id = models.BigAutoField(primary_key=True)
             email = models.EmailField(null=True, db_index=email_index)
+            non_null_field_without_default = models.CharField()
+            if django_version[0] >= 5:
+                non_null_field_with_db_default = models.CharField(
+                    db_default="some default"
+                )
 
             class Meta:
                 app_label = "mock_app"
@@ -160,8 +179,8 @@ def mock_connection():
 def setup_migration_state(
     make_migration, make_project_state, make_user_model, mock_app
 ):
-    def _factory(migration_name: str):
-        user_model = make_user_model()
+    def _factory(migration_name: str, model_kwargs: Optional[dict] = {}):
+        user_model = make_user_model(**model_kwargs)
         pre_migration_state = make_project_state(model=user_model)
         migration = make_migration(migration_name=migration_name)
         return migration, pre_migration_state
@@ -171,8 +190,10 @@ def setup_migration_state(
 
 @pytest.fixture
 def mock_app():
-    apps.populate(installed_apps=["tests.mocks.mock_app.apps"])
+    apps.populate(installed_apps=["tests.mocks.mock_app.apps.MockApp"])
     yield
+    apps.ready = False
+    apps.loading = False
     apps.all_models = {"mock_app": {}}
     apps.app_configs = {}
 

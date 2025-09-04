@@ -2,6 +2,7 @@ import logging
 import re
 from typing import Any, Optional
 
+from django import VERSION as DJANGO_VERSION
 from django.apps import apps
 from django.conf import settings
 from django.core.management.base import CommandError, CommandParser
@@ -80,6 +81,9 @@ class Command(BaseMigrateCommand):
         # we need to mark all migrations prior to the selected migration as "applied"
         # so that our migration plan no longer includes them
         starting_targets = []
+        project_check_dms_redshift_safety = getattr(
+            settings, "STRONG_MIGRATIONS_CHECK_DMS_REDSHIFT_SAFETY", False
+        )
         for target in targets:
             app_label, _target = target
             check_from = getattr(
@@ -116,10 +120,19 @@ class Command(BaseMigrateCommand):
         pg_version = self._pg_major_version(connection=connection)
         for migration, is_backwards in plan:
             if not is_backwards:
+                app_dms_redshift_safety = getattr(
+                    apps.get_app_config(app_label=migration.app_label),
+                    "check_dms_safety",
+                    project_check_dms_redshift_safety,
+                )
+
                 check_migration_safety(
+                    apps=apps,
                     migration=migration,
                     project_state=pre_migrate_state,
                     pg_major_version=pg_version,
+                    check_dms_redshift_safety=app_dms_redshift_safety,
+                    django_version=DJANGO_VERSION,
                 )
                 for operation in migration.operations:
                     operation.state_forwards(migration.app_label, pre_migrate_state)

@@ -1,6 +1,6 @@
-Metadata-Version: 2.4
+Metadata-Version: 2.2
 Name: django-strong-migrations
-Version: 1.0.0rc4
+Version: 1.0.0rc5
 Summary: Catch unsafe migrations in development
 Author: Alexi Garrow
 Author-email: agarrow@getbenepass.com
@@ -21,7 +21,6 @@ Classifier: Topic :: Internet :: WWW/HTTP :: Dynamic Content
 Requires-Python: >=3.8
 License-File: LICENSE
 Requires-Dist: Django>=3.2
-Dynamic: license-file
 
 # Django Strong Migrations
 
@@ -95,6 +94,47 @@ class Migration(migrations.Migration):
     ]
 ```
 
+## DMS/ Redshift Replication Configuration
+
+You can configure the entire project to check for DMS/Redshift Replication safety:
+
+```python
+# settings.py
+
+STRONG_MIGRATIONS_CHECK_DMS_REDSHIFT_SAFETY = True
+```
+
+This setting can optionally be set/overridden on an app basis in app settings:
+
+```python
+# apps.py
+class MyApp(AppConfig):
+    name = "my_app"
+    verbose_name = "My App"
+    check_dms_safety = True
+
+    def ready(self):
+        super().ready()
+
+        import my_app.signals
+```
+
+Finally, this can be set on a per-model basis like so:
+
+```python
+from django.models import Model
+class MyModel(Model):
+    CHECK_DMS_REDSHIFT_SAFETY = False
+```
+
+This is priotized from highest to lowest as:
+
+1. model settings
+2. app settings
+3. project settings
+
+defaulting to False is none are set.
+
 ## Forcing Migrations Through
 
 In a pinch you can use the flag `--skip-strong-migrations` to skip safety checks, but these checks will still be run in your test env until you resolve the issue or mark the migration as safe.
@@ -112,6 +152,10 @@ Postgres-specific checks:
 - [adding a constraint](#addconstraint)
 - [adding an index](#addindex)
 - [removing an index](#removeindex)
+
+DMS / Redshift replication specific checks:
+
+- [changing field nullability](#making-field-nullable)
 
 ### AddField
 
@@ -289,6 +333,25 @@ class Migration(migrations.Migration):
         ),
     ]
 ```
+
+## Redshift / DMS Replication specific checks:
+
+### Making field nullable
+
+Changing the nullability of a column is not supported by redshift.
+If this table/column is being copied to Redshift via DMS, setting the field to non-nullable
+without setting a default value can cause replication failures when null values make their way into that column.
+
+The safe migration path is:
+
+1. Set a default value on the column.
+2. Deploy the application.
+3. Set the column to non-nullable in a follow up migration/deployment.
+
+If you'd like to ignore this table for dms/redshift replication safety,
+set
+CHECK_DMS_REDSHIFT_SAFETY=False
+on the model definition.
 
 ## Contributing
 

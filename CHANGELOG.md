@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0.pre5]
+
+## Added
+
+- Added configuration options for dms / redshift safety checks in project, apps, and models.
+- Added nullability change checks for dms / redshift checked models.
+
+### Fixed
+
+- Fixed bug that caused only the first operation within a migration to be checked for safety.
+
 ## [1.0.0.pre4]
 
 ### Fixed
