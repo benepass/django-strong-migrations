@@ -70,6 +70,47 @@ class Migration(migrations.Migration):
     ]
 ```
 
+## DMS/ Redshift Replication Configuration
+
+You can configure the entire project to check for DMS/Redshift Replication safety:
+
+```python
+# settings.py
+
+STRONG_MIGRATIONS_CHECK_DMS_REDSHIFT_SAFETY = True
+```
+
+This setting can optionally be set/overridden on an app basis in app settings:
+
+```python
+# apps.py
+class MyApp(AppConfig):
+    name = "my_app"
+    verbose_name = "My App"
+    check_dms_safety = True
+
+    def ready(self):
+        super().ready()
+
+        import my_app.signals
+```
+
+Finally, this can be set on a per-model basis like so:
+
+```python
+from django.models import Model
+class MyModel(Model):
+    CHECK_DMS_REDSHIFT_SAFETY = False
+```
+
+This is priotized from highest to lowest as:
+
+1. model settings
+2. app settings
+3. project settings
+
+defaulting to False is none are set.
+
 ## Forcing Migrations Through
 
 In a pinch you can use the flag `--skip-strong-migrations` to skip safety checks, but these checks will still be run in your test env until you resolve the issue or mark the migration as safe.
@@ -87,6 +128,10 @@ Postgres-specific checks:
 - [adding a constraint](#addconstraint)
 - [adding an index](#addindex)
 - [removing an index](#removeindex)
+
+DMS / Redshift replication specific checks:
+
+- [changing field nullability](#making-field-nullable)
 
 ### AddField
 
@@ -264,6 +309,35 @@ class Migration(migrations.Migration):
         ),
     ]
 ```
+
+## Redshift / DMS Replication specific checks:
+
+### Making field nullable
+
+Changing the nullability of a column is not supported by redshift.
+If this table/column is being copied to Redshift via DMS, setting the field to non-nullable
+without setting a db_default value can cause replication failures when null values make their way into that column in redshift.
+
+If you plan on dropping the column:
+
+for django versons >= 5.x: Set a non-null `db_default` value on the field in question.
+for django versions < 5.x: Set a non-null column default using a sql migration operation.
+
+** it may be a good idea to set a db_default even if you plan on keeping the column for now, as dropping it in the future will require a db default **
+
+If you plan on maintaining the column:
+
+You will not be able to insert null values in this column in redshift.
+If you need null values in this column, you'll need to duplicate and replace the column.
+
+- OR - you could set a transformation rule in DMS.
+
+If you don't need null values, set a db_default on django > 5.x, set a default on django < 5.x.
+
+If you'd like to ignore this table for dms/redshift replication safety,
+set
+`CHECK_DMS_REDSHIFT_SAFETY=False`
+on the model definition.
 
 ## Contributing
 

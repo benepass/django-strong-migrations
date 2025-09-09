@@ -29,6 +29,55 @@ def test_check_migration_safety_alter_field_add_index_with_postgres(assert_unsaf
     )
 
 
+def test_check_migration_safety_alter_field_make_nullable_with_default_with_check_dms_redshift_replication(
+    assert_safe, django_version
+):
+    if django_version[0] >= 5:
+        assert_safe(
+            migration_name="alter_field_with_default_make_nullable",
+            check_dms_redshift_safety=True,
+        )
+
+
+def test_check_migration_safety_alter_field_make_nullable_with_check_dms_redshift_replication(
+    assert_unsafe,
+):
+    assert_unsafe(
+        migration_name="alter_field_without_default_make_nullable",
+        info_message="alter_field_make_nullable_dms_redshift",
+        check_dms_redshift_safety=True,
+    )
+
+
+def test_check_migration_safety_alter_field_make_nullable_with_check_dms_redshift_replication_with_operation_db_default(
+    assert_safe, django_version
+):
+    if django_version[0] >= 5:
+        assert_safe(
+            migration_name="alter_field_without_default_make_nullable_with_db_default",
+            check_dms_redshift_safety=True,
+        )
+
+
+def test_check_migration_safety_alter_field_make_nullable_without_check_dms_redshift_replication(
+    assert_safe,
+):
+    assert_safe(
+        migration_name="alter_field_without_default_make_nullable",
+        check_dms_redshift_safety=False,
+    )
+
+
+def test_check_migration_safety_alter_field_make_nullable_without_default_with_check_dms_redshift_replication_but_disabled_model(
+    assert_safe, mock_app
+):
+    assert_safe(
+        migration_name="alter_field_without_default_make_nullable",
+        check_dms_redshift_safety=True,
+        model_kwargs={"check_dms_redshift_safety": False},
+    )
+
+
 def test_check_migration_safety_rename_field(assert_unsafe):
     assert_unsafe("rename_field")
 
@@ -58,3 +107,9 @@ def test_check_migration_safety_add_non_nullable_field_with_jsonb_db_default(
 
 def test_check_migration_safety_add_nullable_field(assert_safe):
     assert_safe(migration_name="add_nullable_field")
+
+
+def test_check_migration_safety_multiple_operations(assert_unsafe):
+    assert_unsafe(
+        migration_name="multiple_operations", info_message="add_non_nullable_field"
+    )

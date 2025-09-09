@@ -2,4 +2,5 @@ from django.apps import AppConfig
 
 
 class MockApp(AppConfig):
-    name = "mock_app"
+    name = "tests.mocks.mock_app"
+    label = "mock_app"

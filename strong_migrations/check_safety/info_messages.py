@@ -60,6 +60,33 @@ INFO_MESSAGES = {
         ]
       """
     ),
+    "alter_field_make_nullable_dms_redshift": dedent(
+        """
+            Changing the nullability of a column is not supported by redshift.
+            If this table/column is being copied to Redshift via DMS, setting the field to non-nullable
+            without setting a db_default value can cause replication failures when null values make their way into that column in redshift.
+
+            If you plan on dropping the column:
+
+            for django versons >= 5.x: Set a non-null `db_default` value on the field in question.
+            for django versions < 5.x: Set a non-null column default using a sql migration operation.
+
+            ** it may be a good idea to set a db_default even if you plan on keeping the column for now, as dropping it in the future will require a db default **
+
+            If you plan on maintaining the column:
+
+            You will not be able to insert null values in this column in redshift.
+            If you need null values in this column, you'll need to duplicate and replace the column.
+            - OR - you could set a transformation rule in DMS.
+
+            If you don't need null values, set a db_default on django > 5.x, set a default on django < 5.x.
+
+            If you'd like to ignore this table for dms/redshift replication safety,
+            set
+            CHECK_DMS_REDSHIFT_SAFETY=False
+            on the model definition.
+      """
+    ),
     "add_non_nullable_field": dedent(
         """
             Adding a non-nullable field is not safe, even with a default value.

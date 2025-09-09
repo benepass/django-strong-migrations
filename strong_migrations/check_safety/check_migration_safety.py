@@ -38,19 +38,25 @@ OPERATION_CHECKS = {
 
 
 def check_migration_safety(
+    apps: any,
     migration: Migration,
     pg_major_version: Optional[int],
+    check_dms_redshift_safety: bool,
     project_state: ProjectState,
-):
+    django_version: tuple,
+) -> bool:
     for operation in migration.operations:
         check_method = OPERATION_CHECKS.get(type(operation))
         if check_method:
             try:
-                return check_method(
+                check_method(
                     operation=operation,
                     pg_major_version=pg_major_version,
                     project_state=project_state,
+                    apps=apps,
+                    check_dms_redshift_safety=check_dms_redshift_safety,
                     migration=migration,
+                    django_version=django_version,
                 )
             except UnsafeMigrationError as error:
                 if getattr(operation, "safety_assured", False):
