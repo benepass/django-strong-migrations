@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.0.pre6]
+
+## Fixed
+
+- Fixed performance issue caused by unnecessary `build_graph` call in loop.
+
 ## [1.0.0.pre5]
 
 ## Added
