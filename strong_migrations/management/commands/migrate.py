@@ -145,7 +145,7 @@ class Command(BaseMigrateCommand):
                     executor.recorder.record_unapplied(
                         app=migration.app_label, name=migration.name
                     )
-                executor.loader.build_graph()
+            executor.loader.build_graph()
 
         executor.migration_plan(targets)
 
