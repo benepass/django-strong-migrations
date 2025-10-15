@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.0]
+
+Public release! 🚀
+
 ## [1.0.0.pre6]
 
 ## Fixed
