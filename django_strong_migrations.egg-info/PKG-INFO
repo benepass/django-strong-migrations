@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: django-strong-migrations
-Version: 1.0.0rc6
+Version: 1.0.0
 Summary: Catch unsafe migrations in development
 Author: Alexi Garrow
 Author-email: agarrow@getbenepass.com
