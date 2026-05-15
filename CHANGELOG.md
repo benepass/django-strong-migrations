@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.1.0]
+
+### Added
+
+- Added Postgres-specific safety check for `AddField` with a `ForeignKey`. Adding a FK acquires a `ShareRowExclusiveLock` on the referenced table, blocking concurrent writes. The check is skipped when `db_constraint=False` or when not running on Postgres.
+
+### Fixed
+
+- Fixed duplicate `reverse_sql` keyword argument in the `add_constraint` info message and README example, which produced invalid Python.
+- Updated the `add_constraint` example to show constraint validation in a separate migration rather than within the same migration, which is necessary to avoid holding an exclusive lock during the validation scan.
+
 ## [1.0.0]
 
 Public release! 🚀
