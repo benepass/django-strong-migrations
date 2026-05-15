@@ -121,6 +121,14 @@ def test_check_migration_safety_add_nullable_foreign_key_with_postgres(assert_un
     )
 
 
+def test_check_migration_safety_add_nullable_foreign_key_no_db_constraint_with_postgres(
+    assert_safe,
+):
+    assert_safe(
+        migration_name="add_nullable_foreign_key_no_db_constraint", pg_version=13
+    )
+
+
 def test_check_migration_safety_multiple_operations(assert_unsafe):
     assert_unsafe(
         migration_name="multiple_operations", info_message="add_non_nullable_field"
