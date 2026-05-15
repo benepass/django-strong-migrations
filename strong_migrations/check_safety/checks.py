@@ -39,7 +39,11 @@ def _check_add_field(operation: AddField, **kwargs):
             extra_info=INFO_MESSAGES["add_non_nullable_field"],
         )
 
-    if kwargs.get("pg_major_version") and isinstance(operation.field, ForeignKey) and operation.field.db_constraint:
+    if (
+        kwargs.get("pg_major_version")
+        and isinstance(operation.field, ForeignKey)
+        and operation.field.db_constraint
+    ):
         raise UnsafeMigrationError(
             migration=kwargs["migration"],
             operation=operation,
