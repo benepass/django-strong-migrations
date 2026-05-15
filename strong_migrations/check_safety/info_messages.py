@@ -88,9 +88,7 @@ INFO_MESSAGES = {
             ),
         ]
 
-        2. Backfill data as needed.
-
-        3. Add the FK constraint with NOT VALID in a separate migration, then validate
+        2. Add the FK constraint with NOT VALID in a separate migration, then validate
            it in another migration to avoid a full-table scan under a heavy lock:
 
         # second migration: add the FK constraint without validating existing rows
