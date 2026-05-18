@@ -69,12 +69,12 @@ INFO_MESSAGES = {
         and referenced tables while the constraint is validated against existing rows.
         This blocks concurrent writes and other FK validations on those tables.
 
-        The safe migration path is to:
+        The safe migration path is to add the column with db_constraint=False and
+        the FK constraint NOT VALID in one migration, then validate in a separate
+        migration. VALIDATE CONSTRAINT must be in its own migration so the
+        AccessExclusiveLock is released before the (non-blocking) validation scan runs.
 
-        1. Add the column without a database-level FK constraint using db_constraint=False
-           and null=True (to avoid the non-nullable column issue separately):
-
-        # first migration: add the column without a FK constraint
+        # first migration: add the column and the NOT VALID FK constraint
         operations = [
             migrations.AddField(
                 model_name="my_model",
@@ -86,20 +86,13 @@ INFO_MESSAGES = {
                     db_constraint=False,
                 ),
             ),
-        ]
-
-        2. Add the FK constraint with NOT VALID in a separate migration, then validate
-           it in another migration to avoid a full-table scan under a heavy lock:
-
-        # second migration: add the FK constraint without validating existing rows
-        operations = [
             migrations.RunSQL(
                 sql='ALTER TABLE "my_model" ADD CONSTRAINT "my_model_other_model_id_fk" FOREIGN KEY ("other_model_id") REFERENCES "other_app_othermodel" ("id") DEFERRABLE INITIALLY DEFERRED NOT VALID;',
                 reverse_sql='ALTER TABLE "my_model" DROP CONSTRAINT "my_model_other_model_id_fk"',
             ),
         ]
 
-        # third migration: validate the constraint in a separate migration
+        # second migration: validate the constraint in a separate migration
         operations = [
             migrations.RunSQL(
                 sql='ALTER TABLE "my_model" VALIDATE CONSTRAINT "my_model_other_model_id_fk";',

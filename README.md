@@ -326,12 +326,12 @@ class Migration(migrations.Migration):
 
 Adding a `ForeignKey` acquires a `ShareRowExclusiveLock` on both the referencing and referenced tables while the constraint is validated against existing rows. This blocks concurrent writes and other FK validations on those tables.
 
-The safe migration path is to decouple the column addition from the constraint validation:
+The safe migration path is to add the column with `db_constraint=False` and the FK constraint `NOT VALID` together in one migration, then validate in a separate migration. `VALIDATE CONSTRAINT` must be in its own migration so the `AccessExclusiveLock` is released before the (non-blocking) validation scan runs.
 
 ```python
 from django.db import migrations, models
 
-# first migration: add the column without a database-level FK constraint
+# first migration: add the column and the NOT VALID FK constraint
 class Migration(migrations.Migration):
     dependencies = [
         ('app', 'prior_migration'),
@@ -348,17 +348,6 @@ class Migration(migrations.Migration):
                 db_constraint=False,
             ),
         ),
-    ]
-```
-
-```python
-# second migration: add the FK constraint without validating existing rows
-class Migration(migrations.Migration):
-    dependencies = [
-        ('app', 'first_migration'),
-    ]
-
-    operations = [
         migrations.RunSQL(
             sql='ALTER TABLE "my_model" ADD CONSTRAINT "my_model_other_model_id_fk" FOREIGN KEY ("other_model_id") REFERENCES "other_app_othermodel" ("id") DEFERRABLE INITIALLY DEFERRED NOT VALID;',
             reverse_sql='ALTER TABLE "my_model" DROP CONSTRAINT "my_model_other_model_id_fk"',
@@ -367,10 +356,10 @@ class Migration(migrations.Migration):
 ```
 
 ```python
-# third migration: validate the constraint in a separate migration
+# second migration: validate the constraint in a separate migration
 class Migration(migrations.Migration):
     dependencies = [
-        ('app', 'second_migration'),
+        ('app', 'first_migration'),
     ]
 
     operations = [
