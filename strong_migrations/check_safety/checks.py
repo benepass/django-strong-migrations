@@ -8,6 +8,7 @@ from django.db.migrations.operations import (
     RenameField,
 )
 from django.db.migrations import Migration
+from django.db.models import ForeignKey
 
 from strong_migrations.check_safety.info_messages import INFO_MESSAGES
 from strong_migrations.errors import UnsafeMigrationError
@@ -31,13 +32,23 @@ def _check_add_field(operation: AddField, **kwargs):
         and getattr(db_default, "__name__", None) != "NOT_PROVIDED"
     )
 
-    if operation.field.null or db_default_set:
-        return
-    raise UnsafeMigrationError(
-        migration=kwargs["migration"],
-        operation=operation,
-        extra_info=INFO_MESSAGES["add_non_nullable_field"],
-    )
+    if not (operation.field.null or db_default_set):
+        raise UnsafeMigrationError(
+            migration=kwargs["migration"],
+            operation=operation,
+            extra_info=INFO_MESSAGES["add_non_nullable_field"],
+        )
+
+    if (
+        kwargs.get("pg_major_version")
+        and isinstance(operation.field, ForeignKey)
+        and operation.field.db_constraint
+    ):
+        raise UnsafeMigrationError(
+            migration=kwargs["migration"],
+            operation=operation,
+            extra_info=INFO_MESSAGES["add_foreign_key"],
+        )
 
 
 def _check_alter_field(operation: AlterField, **kwargs):
