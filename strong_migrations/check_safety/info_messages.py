@@ -1,8 +1,7 @@
 from textwrap import dedent
 
 INFO_MESSAGES = {
-    "add_index": dedent(
-        """
+    "add_index": dedent("""
           Adding an index non-concurrently blocks writes while the index is built.
           Instead, we can use Djangos built in `AddIndexConcurrently`.
           class Migration(migrations.Migration):
@@ -22,10 +21,8 @@ INFO_MESSAGES = {
                       state_operations=[AlterField(...) or AddIndex(...)]
                   ),
               ]
-        """
-    ),
-    "add_constraint": dedent(
-        """
+        """),
+    "add_constraint": dedent("""
         Adding a constraint will lock the table for reads and writes while the table is
         scanned in order to validate the constraint.
 
@@ -58,10 +55,8 @@ INFO_MESSAGES = {
                 reverse_sql=migrations.RunSQL.noop
             )
         ]
-      """
-    ),
-    "alter_field_make_nullable_dms_redshift": dedent(
-        """
+      """),
+    "alter_field_make_nullable_dms_redshift": dedent("""
             Changing the nullability of a column is not supported by redshift.
             If this table/column is being copied to Redshift via DMS, setting the field to non-nullable
             without setting a db_default value can cause replication failures when null values make their way into that column in redshift.
@@ -85,10 +80,8 @@ INFO_MESSAGES = {
             set
             CHECK_DMS_REDSHIFT_SAFETY=False
             on the model definition.
-      """
-    ),
-    "add_non_nullable_field": dedent(
-        """
+      """),
+    "add_non_nullable_field": dedent("""
             Adding a non-nullable field is not safe, even with a default value.
 
             Django will set the default value at the db level only until the column has been added,
@@ -101,10 +94,8 @@ INFO_MESSAGES = {
             3. make the column not nullable using the safe migration procedure for that.
 
             In Django 5.x you can also use db_default to set a db default safely.
-        """
-    ),
-    "remove_field": dedent(
-        """
+        """),
+    "remove_field": dedent("""
           Removing a field using the standard `RemoveField` operation can result in errors in your deployment.
 
           This happens when migrations run before your application has been deployed. Your application will continue referring to the field until it has succesfully been deployed.
@@ -136,10 +127,8 @@ INFO_MESSAGES = {
                   reverse_sql=migrations.RunSQL.noop
               )
           ]
-      """
-    ),
-    "remove_index": dedent(
-        """
+      """),
+    "remove_index": dedent("""
       Removing an index non-concurrently blocks writes while the index is built.
       
       Instead, we can use Djangos built in `DropIndexConcurrently`.
@@ -166,10 +155,8 @@ INFO_MESSAGES = {
                   ),
               ),
           ]
-      """
-    ),
-    "rename_field": dedent(
-        """
+      """),
+    "rename_field": dedent("""
           Renaming a column that's in use will cause application errors in between migrations running and the application deploying, a safer approach is to:
 
           - Create a new column
@@ -178,6 +165,5 @@ INFO_MESSAGES = {
           - Move reads from the old column to the new column
           - Stop writing to the old column
           - Drop the old column
-    """
-    ),
+    """),
 }

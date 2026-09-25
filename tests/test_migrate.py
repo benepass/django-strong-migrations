@@ -77,14 +77,12 @@ def hold_lock_on_legacymodel():
         # STRONG_MIGRATIONS_LOCK_TIMEOUT is set to 1s in the test app
         # this sleeps for 2s, locking the table
         with connection.cursor() as cursor:
-            cursor.execute(
-                """
+            cursor.execute("""
                     begin;
                     lock table legacyapp_legacymodel in ACCESS EXCLUSIVE MODE;
                     select pg_sleep(2);
                     commit;
-                    """
-            )
+                    """)
     finally:
         os.environ.pop("DB", None)
         if not original_settings_module:
