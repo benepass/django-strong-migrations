@@ -171,7 +171,7 @@ class Command(BaseMigrateCommand):
                 raw_version = cursor.fetchone()
             if not raw_version:
                 raise Exception("could not find version number")
-            match = re.search("PostgreSQL (\d+)\.\d{1,}", raw_version[0])
+            match = re.search(r"PostgreSQL (\d+)\.\d{1,}", raw_version[0])
             if not match:
                 raise Exception(
                     f"could not find version number from verson string {raw_version[0]}"
