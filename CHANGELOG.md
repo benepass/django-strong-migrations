@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.1]
+
+### Fixed
+
+- Fixed `SyntaxWarning: invalid escape sequence '\d'` emitted on import of the `migrate` command by using a raw string for the Postgres version regex.
+
 ## [1.1.0]
 
 ### Added
